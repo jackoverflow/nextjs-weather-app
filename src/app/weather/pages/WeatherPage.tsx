@@ -24,6 +24,8 @@ interface WeatherData {
 
 const WeatherPage: React.FC = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchWeather = async (city: string) => {
     setLoading(true);
