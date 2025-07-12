@@ -7,8 +7,8 @@ const app = express();
 app.use(cors());
 
 app.post('/api/register_user/', (req, res) => {
-    // Registration logic here
-    // Implement your registration logic using req and res
+    // Basic registration response to avoid unused variable errors
+    res.status(200).json({ message: 'Registration endpoint - implementation needed' });
 });
 
 export default app; 
