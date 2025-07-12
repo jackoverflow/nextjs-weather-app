@@ -72,7 +72,7 @@ const WeatherPage: React.FC = () => {
 
   return (
     <div className={`weather-page ${backgroundClass}`}>
-      <h1>Leeyo's Weather App</h1>
+      <h1>Leeyo&apos;s Weather App</h1>
       <SearchBar onSearch={fetchWeather} />
       
       {loading && (
