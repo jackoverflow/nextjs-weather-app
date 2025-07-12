@@ -44,7 +44,8 @@ const WeatherPage: React.FC = () => {
     try {
       const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=98e3dbff77b31f38d9fb4c246b8ee063&units=metric`);
       if (!response.ok) {
-        throw new Error(`City "${city}" not found. Please check the spelling or try a different city.`);
+        setError(`City "${city}" not found. Please check the spelling or try a different city.`);
+        return;
       }
       const data = await response.json();
       const weatherData: WeatherData = {
