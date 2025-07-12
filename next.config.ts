@@ -1,7 +1,15 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Add your Next.js config options here
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/weather',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
