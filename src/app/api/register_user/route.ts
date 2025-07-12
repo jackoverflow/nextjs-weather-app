@@ -12,6 +12,8 @@ export async function POST(request: NextRequest) {
     // 4. Return success response
     
     // For now, just return a success response
+    console.log('Registration request received:', body);
+    
     const response = NextResponse.json({ 
       message: 'Registration successful',
       success: true 
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   // Handle preflight requests
   return new NextResponse(null, {
     status: 200,
