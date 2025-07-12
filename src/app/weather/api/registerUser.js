@@ -6,9 +6,9 @@ const app = express();
 // Enable CORS for all routes
 app.use(cors());
 
-app.post('/api/register_user/', (request, response) => {
+app.post('/api/register_user/', (req, res) => {
     // Registration logic here
-    // Use request and response as needed
+    // Implement your registration logic using req and res
 });
 
 export default app; 
