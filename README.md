@@ -49,7 +49,7 @@ The Leaflet library is used in this application to display a map with the weathe
 4. **Rendering the Map**: Inside the `MapComponent`, the `MapContainer` component from Leaflet is used to create the map. The `center` prop is set to the latitude and longitude passed from the `WeatherPage`, ensuring the map displays the correct location. A marker is also placed at this position to indicate the city's location.
 
 ### Example Code Snippet
-Here is a brief code snippet demonstrating how the coordinates are passed to the `MapComponent`:
+Here is a brief code snippet demonstrating how the coordinates are passed to the `MapComponent`:P
 ```javascript
 {weather.lat && weather.lon && <MapComponent lat={weather.lat} lon={weather.lon} city={weather.city} />}
 ```
