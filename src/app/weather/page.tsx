@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import WeatherCard from './components/WeatherCard';
 import SearchBar from './components/SearchBar';
+import LocationButton from './components/LocationButton';
+import { scheduleWeatherNotification } from './services/notificationService';
+import { getCurrentLocation, getLocationFromCoords } from './services/locationService';
 import dynamic from 'next/dynamic';
 import './styles/WeatherStyles.css';
 
@@ -28,6 +31,7 @@ const WeatherPage: React.FC = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasLoadedLocationWeather, setHasLoadedLocationWeather] = useState(false);
 
   const getBackgroundClass = (description: string) => {
     const desc = description.toLowerCase();
@@ -36,6 +40,41 @@ const WeatherPage: React.FC = () => {
     if (desc.includes('cloud')) return 'cloudy';
     return '';
   };
+
+  // Auto-load user's location weather on first visit
+  useEffect(() => {
+    const loadLocationWeatherOnStart = async () => {
+      if (!hasLoadedLocationWeather) {
+        try {
+          const location = await getCurrentLocation();
+          const data = await getLocationFromCoords(location.latitude, location.longitude);
+          
+          const weatherData: WeatherData = {
+            city: data.name,
+            temperature: data.main.temp,
+            description: data.weather[0].description,
+            humidity: data.main.humidity,
+            windSpeed: data.wind.speed,
+            feelsLike: data.main.feels_like,
+            pressure: data.main.pressure,
+            lat: data.coord.lat,
+            lon: data.coord.lon,
+          };
+          
+          setWeather(weatherData);
+          setHasLoadedLocationWeather(true);
+          
+          // Send notification for location weather
+          scheduleWeatherNotification(data);
+        } catch (error) {
+          console.log('Location not available or permission denied, user will need to search manually');
+          setHasLoadedLocationWeather(true);
+        }
+      }
+    };
+
+    loadLocationWeatherOnStart();
+  }, [hasLoadedLocationWeather]);
 
   const fetchWeather = async (city: string) => {
     setLoading(true);
@@ -60,6 +99,9 @@ const WeatherPage: React.FC = () => {
         lon: data.coord.lon,
       };
       setWeather(weatherData);
+      
+      // Send notification for searched weather
+      scheduleWeatherNotification(data);
     } catch (error) {
       console.error('Error fetching weather data:', error);
       setError(error instanceof Error ? error.message : 'An error occurred while fetching weather data');
@@ -68,12 +110,24 @@ const WeatherPage: React.FC = () => {
     }
   };
 
+  const handleLocationWeather = (weatherData: WeatherData) => {
+    setWeather(weatherData);
+    setError(null);
+  };
+
   const backgroundClass = weather ? getBackgroundClass(weather.description) : '';
 
   return (
     <div className={`weather-page ${backgroundClass}`}>
       <h1>Leeyo&apos;s Weather App</h1>
-      <SearchBar onSearch={fetchWeather} />
+      <div className="search-controls">
+        <SearchBar onSearch={fetchWeather} />
+        <LocationButton 
+          onLocationWeather={handleLocationWeather}
+          onError={setError}
+          onLoading={setLoading}
+        />
+      </div>
       
       {loading && (
         <div className="loading">
