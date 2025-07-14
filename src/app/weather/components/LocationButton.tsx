@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { getCurrentLocation, getLocationFromCoords } from '../services/locationService';
-import { requestNotificationPermission } from '../services/notificationService';
+import { requestNotificationPermission, scheduleWeatherNotification } from '../services/notificationService';
 
 interface LocationButtonProps {
   onLocationWeather: (weatherData: any) => void;
@@ -47,10 +47,13 @@ const LocationButton: React.FC<LocationButtonProps> = ({
         lon: weatherData.coord.lon,
       };
       
+      // Send notification for location weather
+      scheduleWeatherNotification(weatherData);
+      
       onLocationWeather(transformedWeatherData);
       
     } catch (error) {
-      console.error('Error getting location weather:', error);
+      console.log('Error getting location weather:', error);
       onError(error instanceof Error ? error.message : 'Failed to get your location weather');
     } finally {
       setIsGettingLocation(false);

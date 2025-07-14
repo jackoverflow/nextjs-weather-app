@@ -14,7 +14,7 @@ export const getCurrentLocation = (): Promise<UserLocation> => {
     if (navigator.permissions) {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
         if (result.state === 'denied') {
-          reject(new Error('Location access is blocked. Please enable location access in your browser settings.'));
+          reject(new Error('Please allow location access to get weather for your current location. You can enable this in your browser settings.'));
           return;
         }
         
