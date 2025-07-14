@@ -10,35 +10,56 @@ export const getCurrentLocation = (): Promise<UserLocation> => {
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-      },
-      (error) => {
-        let errorMessage = 'An error occurred while getting your location.';
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Location access denied by user.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information is unavailable.';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'Location request timed out.';
-            break;
+    // Check if permission is already granted
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        if (result.state === 'denied') {
+          reject(new Error('Location access is blocked. Please enable location access in your browser settings.'));
+          return;
         }
-        reject(new Error(errorMessage));
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000, // 5 minutes
-      }
-    );
+        
+        // Proceed with location request
+        requestLocation(resolve, reject);
+      }).catch(() => {
+        // Fallback if permissions API is not available
+        requestLocation(resolve, reject);
+      });
+    } else {
+      // Fallback for browsers without permissions API
+      requestLocation(resolve, reject);
+    }
   });
+};
+
+const requestLocation = (resolve: (value: UserLocation) => void, reject: (reason: Error) => void) => {
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      resolve({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+    },
+    (error) => {
+      let errorMessage = 'An error occurred while getting your location.';
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage = 'Please allow location access to get weather for your current location. You can enable this in your browser settings.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage = 'Location information is unavailable. Please try again or search for a city manually.';
+          break;
+        case error.TIMEOUT:
+          errorMessage = 'Location request timed out. Please try again.';
+          break;
+      }
+      reject(new Error(errorMessage));
+    },
+    {
+      enableHighAccuracy: false, // Less strict for better compatibility
+      timeout: 15000, // Longer timeout
+      maximumAge: 600000, // 10 minutes cache
+    }
+  );
 };
 
 export const getLocationFromCoords = async (lat: number, lon: number) => {
