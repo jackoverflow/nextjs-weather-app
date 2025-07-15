@@ -10,6 +10,18 @@ interface LocationButtonProps {
   onLoading: (loading: boolean) => void;
 }
 
+interface WeatherData {
+  city: string;
+  temperature: number;
+  description: string;
+  humidity: number;
+  windSpeed: number;
+  feelsLike: number;
+  pressure: number;
+  lat: number;
+  lon: number;
+}
+
 const LocationButton: React.FC<LocationButtonProps> = ({ 
   onLocationWeather, 
   onError, 
@@ -39,7 +51,7 @@ const LocationButton: React.FC<LocationButtonProps> = ({
             console.log('Weather data for location:', weatherData);
 
             // Transform the data to match the expected format
-            const transformedWeatherData = {
+            const transformedWeatherData: WeatherData = {
               city: weatherData.name,
               temperature: weatherData.main.temp,
               description: weatherData.weather[0].description,
