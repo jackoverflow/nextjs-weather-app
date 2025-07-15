@@ -54,7 +54,7 @@ export const showNotification = async (options: NotificationOptions): Promise<vo
   }
 };
 
-export const scheduleWeatherNotification = (weatherData: any): void => {
+export const scheduleWeatherNotification = (weatherData: { weather: { main: string; description: string }[]; main: { temp: number }; name: string }): void => {
   const weatherCondition = weatherData.weather[0].main.toLowerCase();
   const temperature = Math.round(weatherData.main.temp);
   const city = weatherData.name;

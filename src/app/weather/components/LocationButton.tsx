@@ -41,7 +41,7 @@ const LocationButton: React.FC<LocationButtonProps> = ({
       // Prompt for location access
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          async (position) => {
+          async (/* position */) => {
             // Get user's current location
             const location = await getCurrentLocation();
             console.log('User location:', location);

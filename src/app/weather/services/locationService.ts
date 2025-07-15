@@ -71,7 +71,7 @@ export const getLocationFromCoords = async (lat: number, lon: number) => {
       throw new Error('Failed to fetch weather data for location');
     }
     return await response.json();
-  } catch (error) {
+  } catch {
     throw new Error('Failed to get weather data for your location');
   }
 }; 

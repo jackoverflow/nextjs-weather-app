@@ -30,7 +30,6 @@ interface WeatherData {
 const WeatherPage: React.FC = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [hasLoadedLocationWeather, setHasLoadedLocationWeather] = useState(false);
 
   const getBackgroundClass = (description: string) => {
@@ -66,10 +65,9 @@ const WeatherPage: React.FC = () => {
           
           // Send notification for location weather
           scheduleWeatherNotification(data);
-        } catch (error) {
+        } catch {
           console.log('Location not available or permission denied, user will need to search manually');
           setHasLoadedLocationWeather(true);
-          setError('Location not available. Please search manually.');
         }
       }
     };
@@ -79,12 +77,11 @@ const WeatherPage: React.FC = () => {
 
   const fetchWeather = async (city: string) => {
     setLoading(true);
-    setError(null);
     
     try {
       const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=98e3dbff77b31f38d9fb4c246b8ee063&units=metric`);
       if (!response.ok) {
-        setError(`City "${city}" not found. Please check the spelling or try a different city.`);
+        console.error(`City "${city}" not found. Please check the spelling or try a different city.`);
         return;
       }
       const data = await response.json();
@@ -103,9 +100,8 @@ const WeatherPage: React.FC = () => {
       
       // Send notification for searched weather
       scheduleWeatherNotification(data);
-    } catch (error) {
-      console.error('Error fetching weather data:', error);
-      setError(error instanceof Error ? error.message : 'An error occurred while fetching weather data');
+    } catch {
+      console.error('Error fetching weather data.');
     } finally {
       setLoading(false);
     }
@@ -113,7 +109,6 @@ const WeatherPage: React.FC = () => {
 
   const handleLocationWeather = (weatherData: WeatherData) => {
     setWeather(weatherData);
-    setError(null);
   };
 
   const backgroundClass = weather ? getBackgroundClass(weather.description) : '';
@@ -125,7 +120,7 @@ const WeatherPage: React.FC = () => {
         <SearchBar onSearch={fetchWeather} />
         <LocationButton 
           onLocationWeather={handleLocationWeather}
-          onError={setError}
+          onError={() => {}}
           onLoading={setLoading}
         />
       </div>
@@ -136,12 +131,7 @@ const WeatherPage: React.FC = () => {
           <p>Fetching weather data...</p>
         </div>
       )}
-      
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+
       
       {weather && !loading && (
         <div className="weather-content">
