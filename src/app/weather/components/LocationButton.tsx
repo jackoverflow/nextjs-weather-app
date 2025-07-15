@@ -5,7 +5,7 @@ import { getCurrentLocation, getLocationFromCoords } from '../services/locationS
 import { requestNotificationPermission, scheduleWeatherNotification } from '../services/notificationService';
 
 interface LocationButtonProps {
-  onLocationWeather: (weatherData: any) => void;
+  onLocationWeather: (weatherData: WeatherData) => void;
   onError: (error: string) => void;
   onLoading: (loading: boolean) => void;
 }
