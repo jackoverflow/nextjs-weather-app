@@ -69,6 +69,7 @@ const WeatherPage: React.FC = () => {
         } catch (error) {
           console.log('Location not available or permission denied, user will need to search manually');
           setHasLoadedLocationWeather(true);
+          setError('Location not available. Please search manually.');
         }
       }
     };
