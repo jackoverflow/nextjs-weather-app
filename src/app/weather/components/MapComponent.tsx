@@ -1,38 +1,51 @@
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import { Map, View } from 'ol';
+import { fromLonLat } from 'ol/proj';
+import TileLayer from 'ol/layer/Tile';
+import OSM from 'ol/source/OSM';
+import { Icon, Style } from 'ol/style';
+import { Feature } from 'ol';
+import { Point } from 'ol/geom';
+import { Vector as VectorLayer } from 'ol/layer';
+import VectorSource from 'ol/source/Vector';
+import { Map as OlMap } from 'ol';
 
 const MapComponent: React.FC<{ lat: number; lon: number; city: string }> = ({ lat, lon, city }) => {
-  console.log('MapComponent Props:', { lat, lon, city });
-  
   useEffect(() => {
-    // Fix for default markers in react-leaflet
-    delete (L.Icon.Default.prototype as unknown as { _getIconUrl: unknown })._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    const map = new OlMap({
+      target: 'map', // The ID of the div where the map will be rendered
+      layers: [
+        new TileLayer({
+          source: new OSM(),
+        }),
+        new VectorLayer({
+          source: new VectorSource({
+            features: [
+              new Feature({
+                geometry: new Point(fromLonLat([lon, lat])),
+                name: city,
+              }),
+            ],
+          }),
+          style: new Style({
+            image: new Icon({
+              src: 'https://openlayers.org/en/latest/examples/data/icon.png', // Replace with your marker icon URL
+              scale: 0.1,
+            }),
+          }),
+        }),
+      ],
+      view: new View({
+        center: fromLonLat([lon, lat]),
+        zoom: 13,
+      }),
     });
-  }, []);
+
+    return () => map.setTarget(undefined); // Cleanup on unmount
+  }, [lat, lon, city]);
 
   return (
-    <div style={{ height: '400px', width: '100%', marginTop: '20px' }}>
-      <MapContainer 
-        center={[lat, lon]} 
-        zoom={13} 
-        style={{ height: '100%', width: '100%' }}
-        key={`${lat}-${lon}`} // Force re-render when coordinates change
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        <Marker position={[lat, lon]}>
-          <Popup>{city}</Popup>
-        </Marker>
-      </MapContainer>
-    </div>
+    <div id="map" style={{ height: '400px', width: '100%', marginTop: '20px' }} />
   );
 };
 
