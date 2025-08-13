@@ -20,6 +20,7 @@ interface WeatherData {
   pressure: number;
   lat: number;
   lon: number;
+  timestamp: number;
 }
 
 const LocationButton: React.FC<LocationButtonProps> = ({ 
@@ -61,6 +62,7 @@ const LocationButton: React.FC<LocationButtonProps> = ({
               pressure: weatherData.main.pressure,
               lat: weatherData.coord.lat,
               lon: weatherData.coord.lon,
+              timestamp: weatherData.dt * 1000,
             };
 
             // Send notification for location weather
