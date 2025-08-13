@@ -173,19 +173,64 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Error Message Styles */
 .error-message {
-  background: rgba(231, 76, 60, 0.9);
-  color: white;
-  padding: 1rem 2rem;
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
   border-radius: 10px;
-  margin: 1rem 0;
-  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+  padding: 15px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.error-message p {
+  color: #dc3545;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Last Updated Indicator */
+.last-updated {
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+}
+
+.last-updated small {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+/* Auto-refresh indicator */
+.auto-refresh-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(40, 167, 69, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  z-index: 1000;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
 }
 
 .weather-content {
   display: flex;
+  flex-direction: column;
   gap: 2rem;
-  align-items: flex-start;
+  align-items: center;
   width: 100%;
   max-width: 1200px;
 }
@@ -318,4 +363,161 @@
 
 .weather-page.night {
   background: linear-gradient(135deg, #2c3e50 0%, #000428 100%);
+} 
+
+/* Hourly Forecast Styles */
+.hourly-forecast {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hourly-forecast h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.hourly-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hourly-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.hourly-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.hourly-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.hourly-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.hourly-container {
+  display: flex;
+  gap: 15px;
+  padding: 5px 0;
+  min-width: max-content;
+}
+
+.hourly-item {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
+  border-radius: 12px;
+  padding: 15px;
+  min-width: 80px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.hourly-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.hourly-time {
+  margin-bottom: 8px;
+}
+
+.hourly-date {
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.hourly-hour {
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.hourly-icon {
+  font-size: 1.5rem;
+  margin: 8px 0;
+}
+
+.hourly-temp {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.hourly-description {
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 5px;
+  line-height: 1.2;
+}
+
+.hourly-pop {
+  font-size: 0.7rem;
+  color: #4a90e2;
+  font-weight: 600;
+  background: rgba(74, 144, 226, 0.1);
+  padding: 2px 6px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hourly-forecast {
+    padding: 15px;
+    margin: 15px 0;
+  }
+  
+  .hourly-item {
+    min-width: 70px;
+    padding: 12px 8px;
+  }
+  
+  .hourly-icon {
+    font-size: 1.3rem;
+  }
+  
+  .hourly-temp {
+    font-size: 1rem;
+  }
+  
+  .hourly-description {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hourly-container {
+    gap: 10px;
+  }
+  
+  .hourly-item {
+    min-width: 65px;
+    padding: 10px 6px;
+  }
+  
+  .hourly-icon {
+    font-size: 1.2rem;
+  }
+  
+  .hourly-temp {
+    font-size: 0.9rem;
+  }
 } 

@@ -4,8 +4,16 @@ import React, { useState, useEffect } from 'react';
 import WeatherCard from './components/WeatherCard';
 import SearchBar from './components/SearchBar';
 import LocationButton from './components/LocationButton';
+import HourlyForecast from './components/HourlyForecast';
 import { scheduleWeatherNotification } from './services/notificationService';
 import { getCurrentLocation, getLocationFromCoords } from './services/locationService';
+import { 
+  fetchWeatherAndForecast, 
+  getHourlyForecast, 
+  startWeatherAutoRefresh,
+  WeatherResponse,
+  WeatherData 
+} from './services/weatherService';
 import dynamic from 'next/dynamic';
 import './styles/WeatherStyles.css';
 
@@ -15,22 +23,22 @@ const MapComponent = dynamic(() => import('./components/MapComponent'), {
   loading: () => <div>Loading map...</div>
 });
 
-interface WeatherData {
-  city: string;
-  temperature: number;
-  description: string;
-  humidity: number;
-  windSpeed: number;
-  feelsLike: number;
-  pressure: number;
-  lat: number;
-  lon: number;
+interface WeatherPageState {
+  current: WeatherData | null;
+  forecast: any[];
+  lastUpdated: number | null;
 }
 
 const WeatherPage: React.FC = () => {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [weatherData, setWeatherData] = useState<WeatherPageState>({
+    current: null,
+    forecast: [],
+    lastUpdated: null
+  });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [hasLoadedLocationWeather, setHasLoadedLocationWeather] = useState(false);
+  const [autoRefreshCleanup, setAutoRefreshCleanup] = useState<(() => void) | null>(null);
 
   const getBackgroundClass = (description: string) => {
     const desc = description.toLowerCase();
@@ -58,9 +66,14 @@ const WeatherPage: React.FC = () => {
             pressure: data.main.pressure,
             lat: data.coord.lat,
             lon: data.coord.lon,
+            timestamp: data.dt * 1000,
           };
           
-          setWeather(weatherData);
+          setWeatherData({
+            current: weatherData,
+            forecast: [],
+            lastUpdated: Date.now()
+          });
           setHasLoadedLocationWeather(true);
           
           // Send notification for location weather
@@ -75,47 +88,78 @@ const WeatherPage: React.FC = () => {
     loadLocationWeatherOnStart();
   }, [hasLoadedLocationWeather]);
 
+  // Cleanup auto-refresh on unmount
+  useEffect(() => {
+    return () => {
+      if (autoRefreshCleanup) {
+        autoRefreshCleanup();
+      }
+    };
+  }, [autoRefreshCleanup]);
+
   const fetchWeather = async (city: string) => {
     setLoading(true);
+    setError(null);
     
     try {
-      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=98e3dbff77b31f38d9fb4c246b8ee063&units=metric`);
-      if (!response.ok) {
-        console.error(`City "${city}" not found. Please check the spelling or try a different city.`);
-        return;
+      // Stop any existing auto-refresh
+      if (autoRefreshCleanup) {
+        autoRefreshCleanup();
       }
-      const data = await response.json();
-      const weatherData: WeatherData = {
-        city: data.name,
-        temperature: data.main.temp,
-        description: data.weather[0].description,
-        humidity: data.main.humidity,
-        windSpeed: data.wind.speed,
-        feelsLike: data.main.feels_like,
-        pressure: data.main.pressure,
-        lat: data.coord.lat,
-        lon: data.coord.lon,
-      };
-      setWeather(weatherData);
+
+      const data: WeatherResponse = await fetchWeatherAndForecast(city);
+      
+      setWeatherData({
+        current: data.current,
+        forecast: data.forecast,
+        lastUpdated: data.lastUpdated
+      });
+      
+      // Start auto-refresh for this city
+      const cleanup = startWeatherAutoRefresh(
+        city,
+        (updatedData: WeatherResponse) => {
+          setWeatherData({
+            current: updatedData.current,
+            forecast: updatedData.forecast,
+            lastUpdated: updatedData.lastUpdated
+          });
+        },
+        (error: string) => {
+          console.error('Auto-refresh error:', error);
+        }
+      );
+      
+      setAutoRefreshCleanup(() => cleanup);
       
       // Send notification for searched weather
-      scheduleWeatherNotification(data);
-    } catch {
-      console.error('Error fetching weather data.');
+      scheduleWeatherNotification({
+        weather: [{ main: data.current.description, description: data.current.description }],
+        main: { temp: data.current.temperature },
+        name: data.current.city
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error fetching weather data.';
+      setError(errorMessage);
+      console.error('Error fetching weather data:', errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   const handleLocationWeather = (weatherData: WeatherData) => {
-    setWeather(weatherData);
+    setWeatherData({
+      current: weatherData,
+      forecast: [],
+      lastUpdated: Date.now()
+    });
   };
 
-  const backgroundClass = weather ? getBackgroundClass(weather.description) : '';
+  const backgroundClass = weatherData.current ? getBackgroundClass(weatherData.current.description) : '';
+  const hourlyForecast = getHourlyForecast(weatherData.forecast);
 
   return (
     <div className={`weather-page ${backgroundClass}`}>
-      <h1>Leeyo&apos;s Weather App</h1>
       <div className="search-controls">
         <SearchBar onSearch={fetchWeather} />
         <LocationButton 
@@ -132,11 +176,35 @@ const WeatherPage: React.FC = () => {
         </div>
       )}
 
+      {error && (
+        <div className="error-message">
+          <p>{error}</p>
+        </div>
+      )}
       
-      {weather && !loading && (
+      {weatherData.current && !loading && (
         <div className="weather-content">
-          <WeatherCard weather={weather} />
-          {weather.lat && weather.lon && <MapComponent lat={weather.lat} lon={weather.lon} city={weather.city} />}
+          <WeatherCard weather={weatherData.current} />
+          
+          {hourlyForecast.length > 0 && (
+            <HourlyForecast forecast={hourlyForecast} />
+          )}
+          
+          {weatherData.current.lat && weatherData.current.lon && (
+            <MapComponent 
+              lat={weatherData.current.lat} 
+              lon={weatherData.current.lon} 
+              city={weatherData.current.city} 
+            />
+          )}
+          
+          {weatherData.lastUpdated && (
+            <div className="last-updated">
+              <small>
+                Last updated: {new Date(weatherData.lastUpdated).toLocaleTimeString()}
+              </small>
+            </div>
+          )}
         </div>
       )}
     </div>
