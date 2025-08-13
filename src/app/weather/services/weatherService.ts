@@ -119,20 +119,6 @@ const getCitySuggestions = (city: string): string[] => {
     'san andres': ['San Andres', 'Manila'],
     'san miguel': ['San Miguel', 'Manila'],
     'san nicolas': ['San Nicolas', 'Manila'],
-    'intramuros': ['Intramuros', 'Manila'],
-    'binondo': ['Binondo', 'Manila'],
-    'quiapo': ['Quiapo', 'Manila'],
-    'ermita': ['Ermita', 'Manila'],
-    'malate': ['Malate', 'Manila'],
-    'paco': ['Paco', 'Manila'],
-    'pandacan': ['Pandacan', 'Manila'],
-    'port area': ['Port Area', 'Manila'],
-    'santa ana': ['Santa Ana', 'Manila'],
-    'santa cruz': ['Santa Cruz', 'Manila'],
-    'sampaloc': ['Sampaloc', 'Manila'],
-    'san andres': ['San Andres', 'Manila'],
-    'san miguel': ['San Miguel', 'Manila'],
-    'san nicolas': ['San Nicolas', 'Manila'],
     'intramuros': ['Intramuros', 'Manila']
   };
   
